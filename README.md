@@ -1,18 +1,18 @@
-# Uso de Poetry para Instalar y Ejecutar un Programa en Python
+# Using Poetry to Install and Run a Python Program
 
-## 1. Instalar Poetry
+## 1. Install Poetry
 
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-Agregar Poetry al PATH si es necesario:
+Add Poetry to your PATH if necessary:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Verificar la instalación:
+Verify installation:
 
 ```bash
 poetry --version
@@ -20,40 +20,40 @@ poetry --version
 
 ---
 
-## 2. Crear o ingresar a un proyecto
+## 2. Create or Enter a Project
 
-### Entrar a un proyecto existente:
+### Enter an existing project:
 
 ```bash
-cd nombre_del_proyecto
+cd project_name
 ```
 
-### Crear un nuevo proyecto:
+### Create a new project:
 
 ```bash
-poetry new mi_proyecto
-cd mi_proyecto
+poetry new my_project
+cd my_project
 ```
 
 ---
 
-## 3. Instalar dependencias del proyecto
+## 3. Install Project Dependencies
 
 ```bash
 poetry install
 ```
 
-Esto crea automáticamente un entorno virtual aislado.
+Poetry will automatically create an isolated virtual environment.
 
 ---
 
-## 4. Activar el entorno virtual
+## 4. Activate the Virtual Environment
 
 ```bash
 poetry shell
 ```
 
-Salir:
+Exit the shell with:
 
 ```bash
 exit
@@ -61,35 +61,35 @@ exit
 
 ---
 
-## 5. Agregar dependencias
+## 5. Add Dependencies
 
-### Dependencias normales:
+### Regular dependencies:
 ```bash
 poetry add requests
 ```
 
-### Múltiples paquetes:
+### Multiple packages:
 ```bash
 poetry add numpy pandas
 ```
 
-### Dependencias de desarrollo:
+### Development dependencies:
 ```bash
 poetry add --dev pytest black
 ```
 
 ---
 
-## 6. Ejecutar tu programa
+## 6. Run Your Program
 
-### Forma 1: Activando el entorno virtual
+### Method 1: Activate the virtual environment
 
 ```bash
 poetry shell
 python main.py
 ```
 
-### Forma 2: Sin activar el entorno
+### Method 2: Run without activating the environment
 
 ```bash
 poetry run python main.py
@@ -97,16 +97,16 @@ poetry run python main.py
 
 ---
 
-## 7. Ejecutar scripts definidos en `pyproject.toml`
+## 7. Run Scripts Defined in `pyproject.toml`
 
-Ejemplo:
+Example:
 
 ```toml
 [tool.poetry.scripts]
-start = "mi_paquete.main:run"
+start = "my_package.main:run"
 ```
 
-Ejecutar:
+Run the script:
 
 ```bash
 poetry run start
@@ -114,7 +114,7 @@ poetry run start
 
 ---
 
-## 8. Actualizar dependencias
+## 8. Update Dependencies
 
 ```bash
 poetry update
@@ -122,9 +122,9 @@ poetry update
 
 ---
 
-## Ejemplo rápido para correr tu aplicación
+## Quick Example to Run Your App
 
-Si tienes `app.py`:
+If you have an `app.py` file:
 
 ```bash
 poetry install

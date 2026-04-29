@@ -1,28 +1,35 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QGraphicsPixmapItem, QLineEdit, QPushButton, QToolBar, QAction, QLabel, QComboBox
-from PyQt5.QtCore import Qt, QTimer, QPointF, QMetaObject, Q_ARG, pyqtSignal, QObject
-from PyQt5.QtGui import QIcon
-import paho.mqtt.client as mqtt
-import json
 import datetime
+import json
+
+import paho.mqtt.client as mqtt
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Q_ARG, QMetaObject, QObject, QPointF, Qt, QTimer, pyqtSignal
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (
+    QAction,
+    QComboBox,
+    QGraphicsPixmapItem,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QPushButton,
+    QToolBar,
+)
 
 from addAssetWindow import Ui_createAssetWindow
 from addSensorWindow import Ui_createSensorWindow
-from adminSensorWindow import Ui_adminSensorWindow
 from adminAssetWindow import Ui_adminAssetWindow
-
-from sensor import Sensor
+from adminSensorWindow import Ui_adminSensorWindow
 from asset import Asset
+from movingObject import MovingObject
+from mqttConfig import MqttConfig
+from sensor import Sensor
+from temperatureSim import TemperatureSimulator
+from testData import TestData
 from user import User
 
-from testData import TestData
-from temperatureSim import TemperatureSimulator
-from movingObject import MovingObject
-
-from mqttConfig import MqttConfig
 
 class Ui_MainWindow(QMainWindow):
-    
     update_signal = pyqtSignal(str, str)
     update_signal_sensor = pyqtSignal(str, str)
 
@@ -41,19 +48,43 @@ class Ui_MainWindow(QMainWindow):
         self.publish_timer = QTimer()  # Add a timer for publishing MQTT messages
 
         # Define platform coordinates
-        self.platforms = {
-            "Platform 1": (877, 36),
-            "Platform 2": (657, 188)
-        }
+        self.platforms = {"Platform 1": (877, 36), "Platform 2": (657, 188)}
 
         # Define users dictionary
         self.users = {
-            "Professor": User('user_professor1', 'Professor', 'no description', 188.0, 544, "media/user/user_professor.png"),
-            "Postgraduate": User('user_postgraduate1', 'Postgraduate', 'no description', 188.0, 544, "media/user/user_student_postgraduate.png"),
-            "Undergraduate": User('user_underground1', 'Undergraduate', 'no description', 188.0, 544, "media/user/user_student_underground.png"),
-            "Unknown": User('user_unknowing1', 'Unknown', 'no description', 188.0, 544, "media/user/user_unknowing.png")
+            "Professor": User(
+                "user_professor1",
+                "Professor",
+                "no description",
+                188.0,
+                544,
+                "media/user/user_professor.png",
+            ),
+            "Postgraduate": User(
+                "user_postgraduate1",
+                "Postgraduate",
+                "no description",
+                188.0,
+                544,
+                "media/user/user_student_postgraduate.png",
+            ),
+            "Undergraduate": User(
+                "user_underground1",
+                "Undergraduate",
+                "no description",
+                188.0,
+                544,
+                "media/user/user_student_underground.png",
+            ),
+            "Unknown": User(
+                "user_unknowing1",
+                "Unknown",
+                "no description",
+                188.0,
+                544,
+                "media/user/user_unknowing.png",
+            ),
         }
-
 
         self.setupGraphicsView()
         self.setupTextFieldAndButton()
@@ -74,13 +105,13 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
 
-
-
     def setupGraphicsView(self):
         self.scene = QtWidgets.QGraphicsScene(self.centralwidget)
         self.graphicsView = QtWidgets.QGraphicsView(self.scene)
         self.graphicsView.setSceneRect(0, 0, self.scene_width, self.scene_height)
-        self.graphicsView.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.graphicsView.setTransformationAnchor(
+            QtWidgets.QGraphicsView.AnchorUnderMouse
+        )
         self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
         self.addBackgroundToScene()
 
@@ -100,13 +131,17 @@ class Ui_MainWindow(QMainWindow):
     def setupComboBoxAndChangeImageButton(self):
         self.verticalLayout = QtWidgets.QVBoxLayout()
 
-        self.chargeTempTestButton = QPushButton("Charge Temperature Test", self.centralwidget)
+        self.chargeTempTestButton = QPushButton(
+            "Charge Temperature Test", self.centralwidget
+        )
         self.chargeTempTestButton.clicked.connect(self.charge_temperature_test)
         self.verticalLayout.addWidget(self.chargeTempTestButton)
 
         self.bgComboBox = QComboBox(self.centralwidget)
         self.bgComboBox.addItem("1006 room", "media/room-1006.png")
-        self.bgComboBox.addItem("1006 temperature room", "media/room-1006-temperature.png")  # Add more backgrounds as needed
+        self.bgComboBox.addItem(
+            "1006 temperature room", "media/room-1006-temperature.png"
+        )  # Add more backgrounds as needed
         self.verticalLayout.addWidget(self.bgComboBox)
 
         self.changeBgButton = QPushButton("Change Background", self.centralwidget)
@@ -120,32 +155,50 @@ class Ui_MainWindow(QMainWindow):
         self.toolbar.setMovable(False)
         mainWindow.addToolBar(self.toolbar)
 
-        self.create_asset = QAction(QIcon("media/new_asset.png"), "Create Asset", mainWindow)
-        self.admin_asset = QAction(QIcon("media/edit_asset.png"), "Administrate Asset", mainWindow)
+        self.create_asset = QAction(
+            QIcon("media/new_asset.png"), "Create Asset", mainWindow
+        )
+        self.admin_asset = QAction(
+            QIcon("media/edit_asset.png"), "Administrate Asset", mainWindow
+        )
 
-        self.create_sensor = QAction(QIcon("media/new_sensor.png"), "Create Sensor", mainWindow)
-        self.admin_sensor = QAction(QIcon("media/edit_sensor.png"), "Administrate Sensor", mainWindow)
+        self.create_sensor = QAction(
+            QIcon("media/new_sensor.png"), "Create Sensor", mainWindow
+        )
+        self.admin_sensor = QAction(
+            QIcon("media/edit_sensor.png"), "Administrate Sensor", mainWindow
+        )
 
         self.toolbar.addAction(self.create_asset)
         self.toolbar.addAction(self.admin_asset)
         self.toolbar.addAction(self.create_sensor)
         self.toolbar.addAction(self.admin_sensor)
 
-        self.create_asset.triggered.connect(lambda: self.open_windows_create_asset(self))
+        self.create_asset.triggered.connect(
+            lambda: self.open_windows_create_asset(self)
+        )
         self.admin_asset.triggered.connect(lambda: self.open_windows_admin_asset(self))
-        self.create_sensor.triggered.connect(lambda: self.open_windows_create_sensor(self))
-        self.admin_sensor.triggered.connect(lambda: self.open_windows_admin_sensor(self))
+        self.create_sensor.triggered.connect(
+            lambda: self.open_windows_create_sensor(self)
+        )
+        self.admin_sensor.triggered.connect(
+            lambda: self.open_windows_admin_sensor(self)
+        )
 
     def setupTemperatureSimulator(self):
-        self.temperatureSimulator = TemperatureSimulator(self.centralwidget, self.gridLayout)
+        self.temperatureSimulator = TemperatureSimulator(
+            self.centralwidget, self.gridLayout
+        )
         self.temperatureSimulator.set_asset_list(self.assetList)
 
     def addLamp(self):
         self.temperatureSimulator.numLamps += 1
-        self.temperatureSimulator.lampsCountLabel.setText(str(self.temperatureSimulator.numLamps))
+        self.temperatureSimulator.lampsCountLabel.setText(
+            str(self.temperatureSimulator.numLamps)
+        )
         self.create_asset_gi(Asset("lamp", "Lamp", "description"))
 
-    def addBackgroundToScene(self, image_path='media/room-1006.png'):
+    def addBackgroundToScene(self, image_path="media/room-1006.png"):
         pix = QtGui.QPixmap(image_path)
         pix.scaled(self.scene_width, self.scene_height, Qt.KeepAspectRatio)
         self.bg_label = QLabel()
@@ -197,7 +250,7 @@ class Ui_MainWindow(QMainWindow):
     def create_user_gi(self, p_User):
         move_object = MovingObject(p_User, self)
         self.userList.append(move_object)
-        self.scene.addItem(move_object)    
+        self.scene.addItem(move_object)
 
     def get_sensor_list(self):
         return self.sensorList
@@ -209,16 +262,17 @@ class Ui_MainWindow(QMainWindow):
         dataTest = TestData()
         list_test_sensors = dataTest.get_data_sensors()
         list_test_assets = dataTest.get_data_assets()
-        #list_test_users = dataTest.get_data_users()
 
         for test_sensor in list_test_sensors:
             self.create_sensor_gi(test_sensor)
 
-        for test_asset in list_test_assets:            
-            self.create_asset_gi(test_asset)            
+            if test_sensor.get_type() == "SensorTemperature":
+                self.temperatureSimulator.register_temperature_sensor(
+                    test_sensor.get_simulator_sensor()
+                )
 
-        #for test_user in list_test_users:
-        #    self.create_user_gi(test_user)
+        for test_asset in list_test_assets:
+            self.create_asset_gi(test_asset)
 
     def change_background(self):
         selected_bg = self.bgComboBox.currentData()
@@ -230,7 +284,9 @@ class Ui_MainWindow(QMainWindow):
 
         # Add the first combo box for the categories
         self.personCategoryComboBox = QComboBox(self.centralwidget)
-        self.personCategoryComboBox.addItems(["Professor", "Postgraduate", "Undergraduate", "Unknown"])
+        self.personCategoryComboBox.addItems(
+            ["Professor", "Postgraduate", "Undergraduate", "Unknown"]
+        )
         self.verticalLayoutRight.addWidget(self.personCategoryComboBox)
 
         # Add the second combo box for the platforms
@@ -246,12 +302,12 @@ class Ui_MainWindow(QMainWindow):
         # remove the "remove one User" button
         self.removeOneUserButton = QPushButton("Remove User", self.centralwidget)
         self.removeOneUserButton.clicked.connect(self.removeOneUser)
-        self.verticalLayoutRight.addWidget(self.removeOneUserButton)        
+        self.verticalLayoutRight.addWidget(self.removeOneUserButton)
 
         # remove the "remove all User" button
         self.removeUserButton = QPushButton("Remove Users", self.centralwidget)
         self.removeUserButton.clicked.connect(self.removeUsers)
-        self.verticalLayoutRight.addWidget(self.removeUserButton)        
+        self.verticalLayoutRight.addWidget(self.removeUserButton)
 
         # Add the "Add Person" button
         self.addPersonButton = QPushButton("Add Person", self.centralwidget)
@@ -270,36 +326,43 @@ class Ui_MainWindow(QMainWindow):
 
         # Get the platform's position (X, Y)
         posX, posY = self.platforms[platform]
-        
+
         temp_user = self.users[personCategory]
-        temp_user.set_posXY(posX, posY) # Set the position (X, Y) of the user based on platform
+        temp_user.set_posXY(
+            posX, posY
+        )  # Set the position (X, Y) of the user based on platform
         temp_user.set_platform(platform)
 
         # Create the user graphical interface
         self.create_user_gi(temp_user)
 
-        if platform == "Platform 1":            
+        if platform == "Platform 1":
             self.changeSensorValue2("sensor_presence1", 1, temp_user)
         else:
-            self.changeSensorValue2("sensor_presence2", 1, temp_user)        
+            self.changeSensorValue2("sensor_presence2", 1, temp_user)
 
-    def removeUsers(self):        
+    def removeUsers(self):
         print("removing users...")
         for user in self.userList:
             self.scene.removeItem(user)
         self.userList.clear()
         self.changeSensorValue2("sensor_presence1", 0, None)
-        self.changeSensorValue2("sensor_presence2", 0, None)           
+        self.changeSensorValue2("sensor_presence2", 0, None)
 
     def removeOneUser(self):
         print("Removing one user...")
-        
+
         # Get the selected person category and platform
         personCategory = self.personCategoryComboBox.currentText()
         platform = self.platformComboBox.currentText()
 
         # Use a temporary list to avoid modifying the list while iterating
-        users_to_remove = [user for user in self.userList if user.obj.get_type() == personCategory and user.obj.get_platform() == platform]
+        users_to_remove = [
+            user
+            for user in self.userList
+            if user.obj.get_type() == personCategory
+            and user.obj.get_platform() == platform
+        ]
 
         # Remove the users from both the scene and the userList
         for user in users_to_remove:
@@ -316,11 +379,11 @@ class Ui_MainWindow(QMainWindow):
         if self.addPersonButton.isChecked():
             if self.person_item is None:
                 person_pixmap = QtGui.QPixmap("media/person.png")
-                self.person_item = QGraphicsPixmapItem(person_pixmap)               
+                self.person_item = QGraphicsPixmapItem(person_pixmap)
                 self.person_item.setPos(910, 10)
                 self.scene.addItem(self.person_item)
-                self.changeSensorValue("sensor_presence1", 1)               
-            
+                self.changeSensorValue("sensor_presence1", 1)
+
         else:
             if self.person_item is not None:
                 self.scene.removeItem(self.person_item)
@@ -328,7 +391,9 @@ class Ui_MainWindow(QMainWindow):
                 self.changeSensorValue("sensor_presence1", 0)
 
     def setupImageAssetButton(self):
-        self.addAssetControllerButton = QPushButton("Connect asset controller", self.centralwidget)
+        self.addAssetControllerButton = QPushButton(
+            "Connect asset controller", self.centralwidget
+        )
         self.addAssetControllerButton.setCheckable(True)
         self.addAssetControllerButton.clicked.connect(self.addAssetController)
         self.verticalLayoutRight.addWidget(self.addAssetControllerButton)
@@ -357,16 +422,17 @@ class Ui_MainWindow(QMainWindow):
     def publishAssets(self):
         # Create the payload with asset list
         asset_list = [
-            {"id": asset.obj.get_id(), 
-            "status": asset.obj.get_status(),
-            "type": asset.obj.get_type()
+            {
+                "id": asset.obj.get_id(),
+                "status": asset.obj.get_status(),
+                "type": asset.obj.get_type(),
             }
             for asset in self.assetList
         ]
         payload = {
             "id": "asset_controller",
             "assets": asset_list,
-            "datetime": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            "datetime": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
         }
 
         # Convert payload to JSON string
@@ -387,30 +453,31 @@ class Ui_MainWindow(QMainWindow):
         #### Inform to the presence sensor that person is present
         for v_sensor in self.sensorList:
             if v_sensor.obj.get_id() == id_sensor:
-               v_sensor.obj.get_simulator_sensor().change_reading(new_value, new_user)
-
+                v_sensor.obj.get_simulator_sensor().change_reading(new_value, new_user)
 
     def setupMqttClient(self):
-        #Get data from mqtt config 
+        # Get data from mqtt config
         config = MqttConfig()
         mqtt_data = config.get_data_mqtt()
-        user_mqtt = mqtt_data['user']
-        pass_mqtt = mqtt_data['password']
+        user_mqtt = mqtt_data["user"]
+        pass_mqtt = mqtt_data["password"]
         self.client = mqtt.Client("GUI-Subcriber-Publisher")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         if user_mqtt and pass_mqtt:
             self.client.username_pw_set(user_mqtt, pass_mqtt)
-        self.client.connect(mqtt_data['host'], mqtt_data['port'], 60)
+        self.client.connect(mqtt_data["host"], mqtt_data["port"], 60)
         self.client.loop_start()
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
         client.subscribe("lab1006/control/asset")
-        client.subscribe("lab1006/control/sensor")  # Add this line to subscribe to the sensor topic
+        client.subscribe(
+            "lab1006/control/sensor"
+        )  # Add this line to subscribe to the sensor topic
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode('utf-8')
+        payload = msg.payload.decode("utf-8")
         data = json.loads(payload)
 
         if msg.topic == "lab1006/control/asset":
@@ -420,7 +487,9 @@ class Ui_MainWindow(QMainWindow):
         elif msg.topic == "lab1006/control/sensor":
             id_sensor = data.get("id")
             new_value = data.get("agent_monitor_id")
-            self.update_signal_sensor.emit(id_sensor, new_value)  # Emit a signal to update sensor
+            self.update_signal_sensor.emit(
+                id_sensor, new_value
+            )  # Emit a signal to update sensor
 
     def update_sensor_values(self, id_sensor, new_value):
         print(f"Updating sensor... > {id_sensor} , {new_value}")
@@ -432,8 +501,8 @@ class Ui_MainWindow(QMainWindow):
 
     def update_asset_state(self, id_asset, new_value):
         print(f"Updating asset... > {id_asset} , {new_value}")
-        for v_asset in self.assetList:            
-            if v_asset.obj.get_id() == id_asset:                   
+        for v_asset in self.assetList:
+            if v_asset.obj.get_id() == id_asset:
                 if new_value == "1":
                     v_asset.change_image(v_asset.obj.get_path_state1())
                     v_asset.obj.set_status("ON")
@@ -447,8 +516,9 @@ class Ui_MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle('Fusion')
+    app.setStyle("Fusion")
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)

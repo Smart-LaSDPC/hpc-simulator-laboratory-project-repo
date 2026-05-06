@@ -2,6 +2,13 @@ import datetime
 import json
 
 import paho.mqtt.client as mqtt
+from addAssetWindow import Ui_createAssetWindow
+from addSensorWindow import Ui_createSensorWindow
+from adminAssetWindow import Ui_adminAssetWindow
+from adminSensorWindow import Ui_adminSensorWindow
+from asset import Asset
+from movingObject import MovingObject
+from mqttConfig import MqttConfig
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Q_ARG, QMetaObject, QObject, QPointF, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QIcon
@@ -15,18 +22,27 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QToolBar,
 )
-
-from addAssetWindow import Ui_createAssetWindow
-from addSensorWindow import Ui_createSensorWindow
-from adminAssetWindow import Ui_adminAssetWindow
-from adminSensorWindow import Ui_adminSensorWindow
-from asset import Asset
-from movingObject import MovingObject
-from mqttConfig import MqttConfig
 from sensor import Sensor
 from temperatureSim import TemperatureSimulator
 from testData import TestData
 from user import User
+
+DATACENTER_ASSET_IDS = {
+    "asset_aircond1",
+    "asset_aircond2",
+    "asset_aircond3",
+    "asset_lamp1",
+    "asset_lamp2",
+    "asset_lamp3",
+    "asset_lamp4",
+    "asset_lamp5",
+}
+
+DATACENTER_SENSOR_IDS = {
+    "sensor_temperature1",
+    "sensor_temperature2",
+    "sensor_temperature3",
+}
 
 
 class Ui_MainWindow(QMainWindow):
@@ -186,17 +202,21 @@ class Ui_MainWindow(QMainWindow):
         )
 
     def setupTemperatureSimulator(self):
-        self.temperatureSimulator = TemperatureSimulator(
-            self.centralwidget, self.gridLayout
+        self.tempSimDatacenter = TemperatureSimulator(
+            self.centralwidget,
+            self.gridLayout,
+            zone_name="Datacenter",
+            grid_row_offset=3,
         )
-        self.temperatureSimulator.set_asset_list(self.assetList)
+        self.tempSimLab = TemperatureSimulator(
+            self.centralwidget,
+            self.gridLayout,
+            zone_name="Laboratorio",
+            grid_row_offset=10,
+        )
 
     def addLamp(self):
-        self.temperatureSimulator.numLamps += 1
-        self.temperatureSimulator.lampsCountLabel.setText(
-            str(self.temperatureSimulator.numLamps)
-        )
-        self.create_asset_gi(Asset("lamp", "Lamp", "description"))
+        self.create_asset_gi(Asset("lamp", "Lamp", "des1ription"))
 
     def addBackgroundToScene(self, image_path="media/room-1006.png"):
         pix = QtGui.QPixmap(image_path)
@@ -242,10 +262,25 @@ class Ui_MainWindow(QMainWindow):
         self.sensorList.append(move_object)
         self.scene.addItem(move_object)
 
+        if p_Sensor.get_type() == "SensorTemperature":
+            if p_Sensor.get_id() in DATACENTER_SENSOR_IDS:
+                self.tempSimDatacenter.register_temperature_sensor(
+                    p_Sensor.get_simulator_sensor()
+                )
+            else:
+                self.tempSimLab.register_temperature_sensor(
+                    p_Sensor.get_simulator_sensor()
+                )
+
     def create_asset_gi(self, p_Asset):
         move_object = MovingObject(p_Asset, self)
         self.assetList.append(move_object)
         self.scene.addItem(move_object)
+
+        if p_Asset.get_id() in DATACENTER_ASSET_IDS:
+            self.tempSimDatacenter.assetList.append(move_object)
+        else:
+            self.tempSimLab.assetList.append(move_object)
 
     def create_user_gi(self, p_User):
         move_object = MovingObject(p_User, self)
@@ -265,11 +300,6 @@ class Ui_MainWindow(QMainWindow):
 
         for test_sensor in list_test_sensors:
             self.create_sensor_gi(test_sensor)
-
-            if test_sensor.get_type() == "SensorTemperature":
-                self.temperatureSimulator.register_temperature_sensor(
-                    test_sensor.get_simulator_sensor()
-                )
 
         for test_asset in list_test_assets:
             self.create_asset_gi(test_asset)

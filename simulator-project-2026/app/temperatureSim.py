@@ -3,9 +3,11 @@ from PyQt5.QtWidgets import QLabel, QLineEdit
 
 
 class TemperatureSimulator:
-    def __init__(self, centralwidget, gridLayout):
+    def __init__(self, centralwidget, gridLayout, zone_name="Room", grid_row_offset=0):
         self.centralwidget = centralwidget
         self.gridLayout = gridLayout
+        self.zone_name = zone_name
+        self.grid_row_offset = grid_row_offset
         self.numLamps = 0
         self.numHeaters = 0
         self.qLamp = 100  # Heat gain from each lamp in Watts
@@ -18,38 +20,39 @@ class TemperatureSimulator:
         self.qAC = 3500  # Capacity of the AC in Watts
         self.numACs = 0
         self._registered_sensors = []  # Sensors that will received the calculated temperature
+        self.assetList = []
         self.setupTemperatureSimulator()
 
     def setupTemperatureSimulator(self):
+        r = self.grid_row_offset
+
+        self.zoneLabel = QLabel(f"--- {self.zone_name} ---", self.centralwidget)
+        self.gridLayout.addWidget(self.zoneLabel, r, 0, 1, 2)
+
         self.roomTempLabel = QLabel("Room Temperature (°C):", self.centralwidget)
         self.roomTempInput = QLineEdit("25", self.centralwidget)
+        self.gridLayout.addWidget(self.roomTempLabel, r + 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.roomTempInput, r + 1, 1, 1, 1)
 
         self.outsideTempLabel = QLabel("Outside Temperature (°C):", self.centralwidget)
         self.outsideTempInput = QLineEdit("20", self.centralwidget)
+        self.gridLayout.addWidget(self.outsideTempLabel, r + 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.outsideTempInput, r + 2, 1, 1, 1)
 
         self.lampsLabel = QLabel("Number of Lamps:", self.centralwidget)
         self.lampsCountLabel = QLabel("0", self.centralwidget)
+        self.gridLayout.addWidget(self.lampsLabel, r + 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.lampsCountLabel, r + 3, 1, 1, 1)
 
         self.heatersLabel = QLabel("Number of Heaters:", self.centralwidget)
         self.heatersCountLabel = QLabel("0", self.centralwidget)
+        self.gridLayout.addWidget(self.heatersLabel, r + 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.heatersCountLabel, r + 4, 1, 1, 1)
 
         self.acLabel = QLabel("Number of ACs:", self.centralwidget)
         self.acCountLabel = QLabel("0", self.centralwidget)
-
-        self.gridLayout.addWidget(self.acLabel, 7, 0, 1, 1)
-        self.gridLayout.addWidget(self.acCountLabel, 7, 1, 1, 1)
-
-        self.gridLayout.addWidget(self.roomTempLabel, 3, 0, 1, 1)
-        self.gridLayout.addWidget(self.roomTempInput, 3, 1, 1, 1)
-
-        self.gridLayout.addWidget(self.outsideTempLabel, 4, 0, 1, 1)
-        self.gridLayout.addWidget(self.outsideTempInput, 4, 1, 1, 1)
-
-        self.gridLayout.addWidget(self.lampsLabel, 5, 0, 1, 1)
-        self.gridLayout.addWidget(self.lampsCountLabel, 5, 1, 1, 1)
-
-        self.gridLayout.addWidget(self.heatersLabel, 6, 0, 1, 1)
-        self.gridLayout.addWidget(self.heatersCountLabel, 6, 1, 1, 1)
+        self.gridLayout.addWidget(self.acLabel, r + 5, 0, 1, 1)
+        self.gridLayout.addWidget(self.acCountLabel, r + 5, 1, 1, 1)
 
         self.simulationTimer = QTimer()
         self.simulationTimer.timeout.connect(self.updateTemperature)
@@ -67,20 +70,14 @@ class TemperatureSimulator:
 
         self.updateNumLampsHeatersTurnOn()
 
-        qGainLamps = self.qLamp * self.numLamps  # Total heat gain from lamps
-        qGainHeaters = self.qHeater * self.numHeaters  # Total heat gain from heaters
-        qGain = qGainLamps + qGainHeaters  # Combined heat gain
-
-        qCoolAC = self.qAC * self.numACs
-        qNet = qGain - qCoolAC
-
-        qLoss = (
-            self.uValue * self.wallArea * (tRoom - tOut)
-        )  # Heat loss to the outside environment
-
-        # Calculate temperature change
-        deltaT = (qNet - qLoss) / (self.density * self.volume * self.cPair)
-        tRoom += deltaT  # Update room temperature
+        qnet = (
+            (self.qLamp * self.numLamps)
+            + (self.qHeater * self.numHeaters)
+            - (self.qAC * self.numACs)
+        )
+        qLoss = self.uValue * self.wallArea * (tRoom - tOut)
+        deltaT = (qnet - qLoss) / (self.density * self.volume * self.cPair)
+        tRoom += deltaT
 
         self.roomTempInput.setText(f"{tRoom:.4f}")
 
@@ -88,9 +85,7 @@ class TemperatureSimulator:
             sensor_sim.set_external_value(tRoom)
 
     def updateNumLampsHeatersTurnOn(self):
-        self.numLamps = 0
-        self.numHeaters = 0
-        self.numACs = 0
+        self.numLamps = self.numHeaters = self.numACs = 0
 
         for asset in self.assetList:
             t = asset.obj.get_type()

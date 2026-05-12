@@ -202,17 +202,25 @@ class Ui_MainWindow(QMainWindow):
         )
 
     def setupTemperatureSimulator(self):
+        self.tempScrollArea = QtWidgets.QScrollArea(self.centralwidget)
+        self.tempScrollArea.setWidgetResizable(True)
+        self.tempScrollArea.setFixedHeight(150)
+
+        self.tempScrollContent = QtWidgets.QWidget()
+        self.tempScrollLayout = QtWidgets.QHBoxLayout(self.tempScrollContent)
+        self.tempScrollLayout.setAlignment(Qt.AlignLeft)
+        self.tempScrollArea.setWidget(self.tempScrollContent)
+
+        self.gridLayout.addWidget(self.tempScrollArea, 3, 0, 1, 1)
+
         self.tempSimDatacenter = TemperatureSimulator(
-            self.centralwidget,
-            self.gridLayout,
+            self.tempScrollContent, self.tempScrollLayout,
             zone_name="Datacenter",
-            grid_row_offset=3,
+            wallArea=50,
+            volume=25,
         )
         self.tempSimLab = TemperatureSimulator(
-            self.centralwidget,
-            self.gridLayout,
-            zone_name="Laboratorio",
-            grid_row_offset=10,
+            self.tempScrollContent, self.tempScrollLayout, zone_name="Laboratorio"
         )
 
     def addLamp(self):

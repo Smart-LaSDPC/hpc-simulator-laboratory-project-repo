@@ -112,13 +112,15 @@ class TestData(object):
 		listAssets.append(Asset('asset_aircond5', 'AssetAirConditioning', 'no description', 647.0, 544, 
 											"media/asset/asset_aircond_on.png", "media/asset/asset_aircond_off.png"))
 
-		listAssets.append(Asset('asset_heat1', 'AssetHeat', 'no description', 456.0, 562.0, 
+		listAssets.append(Asset('asset_heat1', 'AssetHeat', 'no description', 456.0, 562.0,
 											"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
-		#listAssets.append(Asset('asset_heat', 'AssetHeat', 'no description', 647.0, 544, 
-		#									"media/asset/asset_aircond_on.png", "media/asset/asset_aircond_off.png"))
 
-
-
+		listAssets.append(Asset('asset_datacenter1', 'AssetDatacenter', 'Datacenter 1 (14 racks)', 150.0, 170.0,
+										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
+		listAssets.append(Asset('asset_datacenter2', 'AssetDatacenter', 'Datacenter 2 (14 racks)', 320.0, 170.0,
+										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
+		listAssets.append(Asset('asset_datacenter3', 'AssetDatacenter', 'Datacenter 3 (14 racks)', 490.0, 170.0,
+										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
 
 		return listAssets
 

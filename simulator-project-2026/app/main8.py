@@ -36,6 +36,9 @@ DATACENTER_ASSET_IDS = {
     "asset_lamp3",
     "asset_lamp4",
     "asset_lamp5",
+    "asset_datacenter1",
+    "asset_datacenter2",
+    "asset_datacenter3",
 }
 
 DATACENTER_SENSOR_IDS = {
@@ -218,6 +221,9 @@ class Ui_MainWindow(QMainWindow):
             zone_name="Datacenter",
             wallArea=50,
             volume=25,
+            qAC=8000,
+            qRack=500,
+            racks_per_datacenter=14,
         )
         self.tempSimLab = TemperatureSimulator(
             self.tempScrollContent, self.tempScrollLayout, zone_name="Laboratorio"

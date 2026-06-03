@@ -157,10 +157,10 @@ class Ui_MainWindow(QMainWindow):
         self.verticalLayout.addWidget(self.chargeTempTestButton)
 
         self.bgComboBox = QComboBox(self.centralwidget)
-        self.bgComboBox.addItem("1006 room", "media/room-1006.png")
         self.bgComboBox.addItem(
             "1006 temperature room", "media/room-1006-temperature.png"
         )  # Add more backgrounds as needed
+        self.bgComboBox.addItem("1006 room", "media/room-1006.png")
         self.verticalLayout.addWidget(self.bgComboBox)
 
         self.changeBgButton = QPushButton("Change Background", self.centralwidget)
@@ -219,6 +219,7 @@ class Ui_MainWindow(QMainWindow):
         self.tempSimDatacenter = TemperatureSimulator(
             self.tempScrollContent, self.tempScrollLayout,
             zone_name="Datacenter",
+            temp_threshold=17,
             wallArea=50,
             volume=25,
             qAC=8000,
@@ -232,7 +233,7 @@ class Ui_MainWindow(QMainWindow):
     def addLamp(self):
         self.create_asset_gi(Asset("lamp", "Lamp", "des1ription"))
 
-    def addBackgroundToScene(self, image_path="media/room-1006-temperature.png"):
+    def addBackgroundToScene(self, image_path="media/room-1006.png"):
         pix = QtGui.QPixmap(image_path)
         pix.scaled(self.scene_width, self.scene_height, Qt.KeepAspectRatio)
         self.bg_label = QLabel()
@@ -308,6 +309,7 @@ class Ui_MainWindow(QMainWindow):
         return self.assetList
 
     def charge_temperature_test(self):
+        self.change_background()
         dataTest = TestData()
         list_test_sensors = dataTest.get_data_sensors()
         list_test_assets = dataTest.get_data_assets()

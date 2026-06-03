@@ -3,10 +3,11 @@ from PyQt5.QtWidgets import QLabel, QLineEdit, QFrame, QVBoxLayout, QHBoxLayout
 
 
 class TemperatureSimulator:
-    def __init__(self, parent_widget, parent_layout, zone_name="Room",
+    def __init__(self, parent_widget, parent_layout, zone_name="Room", temp_threshold=22,
              qLamp=100, qHeater=2000, qAC=3500, qRack=500, racks_per_datacenter=14,
              uValue=0.2, wallArea=100, volume=50):
         self.zone_name = zone_name
+        self.temp_threshold = temp_threshold
         self.qLamp = qLamp                          # Heat gain from each lamp in Watts
         self.qHeater = qHeater                      # Heat gain from each heater in Watts
         self.qAC = qAC                              # Cooling capacity of each AC in Watts
@@ -43,6 +44,9 @@ class TemperatureSimulator:
 
         self.roomTempInput = QLineEdit("25", self.frame)
         add_row("Room Temp (°C):", self.roomTempInput)
+
+        self.temp_threshold_label = QLabel(str(self.temp_threshold), self.frame)
+        add_row("Threshold:", self.temp_threshold_label)
 
         self.outsideTempInput = QLineEdit("20", self.frame)
         add_row("Outside Temp (°C):", self.outsideTempInput)

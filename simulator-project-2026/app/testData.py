@@ -27,7 +27,7 @@ class TestData(object):
 	
 		listSensors.append(Sensor('sensor_presence1', 'SensorPresence', 'no description', 920.0, 115.00,
 													 "media/sensor/sensor_on.png", "media/sensor/sensor_off.png", default_user))		
-		listSensors.append(Sensor('sensor_presence2', 'SensorPresence', 'no description', 700.0, 150.00,
+		listSensors.append(Sensor('sensor_presence2', 'SensorPresence', 'no description', 740.0, 150.00,
 													 "media/sensor/sensor_on.png", "media/sensor/sensor_off.png", default_user))
 
 		listSensors.append(Sensor('sensor_temperature_outside', 'SensorTemperature', 'no description', 930.0, 640.0,
@@ -115,11 +115,11 @@ class TestData(object):
 		listAssets.append(Asset('asset_heat1', 'AssetHeat', 'no description', 456.0, 562.0,
 											"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
 
-		listAssets.append(Asset('asset_datacenter1', 'AssetDatacenter', 'Datacenter 1 (14 racks)', 150.0, 170.0,
+		listAssets.append(Asset('asset_datacenter1', 'AssetDatacenter', 'Datacenter 1 (14 racks)', 150.0, 70.0,
 										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
-		listAssets.append(Asset('asset_datacenter2', 'AssetDatacenter', 'Datacenter 2 (14 racks)', 320.0, 170.0,
+		listAssets.append(Asset('asset_datacenter2', 'AssetDatacenter', 'Datacenter 2 (14 racks)', 320.0, 70.0,
 										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
-		listAssets.append(Asset('asset_datacenter3', 'AssetDatacenter', 'Datacenter 3 (14 racks)', 490.0, 170.0,
+		listAssets.append(Asset('asset_datacenter3', 'AssetDatacenter', 'Datacenter 3 (14 racks)', 490.0, 70.0,
 										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
 
 		return listAssets

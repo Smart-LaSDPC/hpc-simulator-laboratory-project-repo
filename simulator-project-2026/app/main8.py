@@ -232,7 +232,7 @@ class Ui_MainWindow(QMainWindow):
     def addLamp(self):
         self.create_asset_gi(Asset("lamp", "Lamp", "des1ription"))
 
-    def addBackgroundToScene(self, image_path="media/room-1006.png"):
+    def addBackgroundToScene(self, image_path="media/room-1006-temperature.png"):
         pix = QtGui.QPixmap(image_path)
         pix.scaled(self.scene_width, self.scene_height, Qt.KeepAspectRatio)
         self.bg_label = QLabel()

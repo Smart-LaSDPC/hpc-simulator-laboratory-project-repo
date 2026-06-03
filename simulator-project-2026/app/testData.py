@@ -116,11 +116,11 @@ class TestData(object):
 											"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
 
 		listAssets.append(Asset('asset_datacenter1', 'AssetDatacenter', 'Datacenter 1 (14 racks)', 150.0, 70.0,
-										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
+										"media/asset/asset_datacenter_on.png", "media/asset/asset_datacenter_off.png"))
 		listAssets.append(Asset('asset_datacenter2', 'AssetDatacenter', 'Datacenter 2 (14 racks)', 320.0, 70.0,
-										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
+										"media/asset/asset_datacenter_on.png", "media/asset/asset_datacenter_off.png"))
 		listAssets.append(Asset('asset_datacenter3', 'AssetDatacenter', 'Datacenter 3 (14 racks)', 490.0, 70.0,
-										"media/asset/asset_heat_on.png", "media/asset/asset_heat_off.png"))
+										"media/asset/asset_datacenter_on.png", "media/asset/asset_datacenter_off.png"))
 
 		return listAssets
 

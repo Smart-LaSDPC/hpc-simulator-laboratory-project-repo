@@ -42,7 +42,7 @@ The application must be launched from the `app/` directory so it can find its me
 
 ```bash
 cd app
-python main8.py
+poetry run python main8.py
 ```
 
 A window titled **MainWindow-Simulator** will open showing a floor plan of lab 1006.
@@ -121,8 +121,8 @@ mosquitto_sub -h localhost -p 1883 -u mqtt -P lasdpc -t "lab1006/#" -v
 ### Step 5 - Change the background view
 
 Use the dropdown on the left to switch between:
-- **1006 room** - default floor plan view
-- **1006 temperature room** - temperature-focused overlay
+- **1006 temperature room** - default temperature-focused overlay
+- **1006 room** - floor plan view
 
 Then click **"Change Background"**.
 

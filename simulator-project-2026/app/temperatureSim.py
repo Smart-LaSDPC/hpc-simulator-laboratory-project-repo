@@ -1,3 +1,5 @@
+import time
+
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QLabel, QLineEdit, QFrame, QVBoxLayout, QHBoxLayout
 
@@ -24,6 +26,10 @@ class TemperatureSimulator:
         self.density = 1.225                        # kg/m^3 - Density of air
         self._registered_sensors = []
         self.assetList = []
+        self.temperature_history = []              # list of (timestamp_float, temperature)
+        self.energy_history = []                   # list of (timestamp_float, cumulative_energy_Wh)
+        self.total_energy_wh = 0.0
+        self._delta_t = 1.0                        # seconds per simulation step
         self._build_ui(parent_widget, parent_layout)
 
     def _build_ui(self, parent_widget, parent_layout):
@@ -87,6 +93,16 @@ class TemperatureSimulator:
         tRoom += deltaT
 
         self.roomTempInput.setText(f"{tRoom:.4f}")
+
+        ts = time.time()
+        self.temperature_history.append((ts, tRoom))
+
+        power_w = (self.qLamp * self.numLamps
+                   + self.qHeater * self.numHeaters
+                   + self.qAC * self.numACs
+                   + self.qRack * self.racks_per_datacenter * self.numDatacenters)
+        self.total_energy_wh += (power_w * self._delta_t) / 3600.0
+        self.energy_history.append((ts, self.total_energy_wh))
 
         for sensor_sim in self._registered_sensors:
             sensor_sim.set_external_value(tRoom)

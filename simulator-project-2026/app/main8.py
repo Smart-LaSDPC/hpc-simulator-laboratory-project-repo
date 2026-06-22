@@ -7,6 +7,7 @@ from addSensorWindow import Ui_createSensorWindow
 from adminAssetWindow import Ui_adminAssetWindow
 from adminSensorWindow import Ui_adminSensorWindow
 from asset import Asset
+from energyMonitorWindow import EnergyMonitorWindow
 from movingObject import MovingObject
 from mqttConfig import MqttConfig
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -193,6 +194,15 @@ class Ui_MainWindow(QMainWindow):
         self.toolbar.addAction(self.create_sensor)
         self.toolbar.addAction(self.admin_sensor)
 
+        spacer = QtWidgets.QWidget()
+        spacer.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
+        )
+        self.toolbar.addWidget(spacer)
+
+        self.energy_monitoring = QAction("Energy Monitoring", mainWindow)
+        self.toolbar.addAction(self.energy_monitoring)
+
         self.create_asset.triggered.connect(
             lambda: self.open_windows_create_asset(self)
         )
@@ -203,6 +213,7 @@ class Ui_MainWindow(QMainWindow):
         self.admin_sensor.triggered.connect(
             lambda: self.open_windows_admin_sensor(self)
         )
+        self.energy_monitoring.triggered.connect(self.open_energy_monitor)
 
     def setupTemperatureSimulator(self):
         self.tempScrollArea = QtWidgets.QScrollArea(self.centralwidget)
@@ -259,6 +270,12 @@ class Ui_MainWindow(QMainWindow):
         self.ui2 = Ui_createSensorWindow()
         self.ui2.setupUi(self.window, p_Ui_MainWindow)
         self.window.show()
+
+    def open_energy_monitor(self):
+        self.energy_window = EnergyMonitorWindow(
+            [self.tempSimDatacenter, self.tempSimLab]
+        )
+        self.energy_window.show()
 
     def open_windows_admin_sensor(self, p_Ui_MainWindow):
         self.window = QtWidgets.QMainWindow()

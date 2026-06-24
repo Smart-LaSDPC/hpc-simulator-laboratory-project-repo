@@ -1,10 +1,10 @@
 class MqttConfig:
     def __init__(self):
         self.mqtt_data = {
-            "user": "lasdpc",
-            "password": "l@sdpC10",
-            "host": "andromeda.lasdpc.icmc.usp.br",
-            "port": 6183
+            "user": "mqtt",
+            "password": "lasdpc",
+            "host": "localhost",
+            "port": 1883
         }
         
     def get_data_mqtt(self):

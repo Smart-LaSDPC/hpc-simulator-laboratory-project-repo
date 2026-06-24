@@ -13,9 +13,17 @@ class MovingObject(QGraphicsPixmapItem):
 
         # Load the image and set it as the pixmap
         if isinstance(obj, User):
-            self.setPixmap(QPixmap(obj.get_path())) # Placeholder for user
+            self.setPixmap(QPixmap(obj.get_path()))
         else:
-            self.setPixmap(QPixmap(obj.get_path_state2()))  # Placeholder for sensor and asset image
+            pixmap = QPixmap(obj.get_path_state2())
+            if obj.get_type() == "AssetDatacenter":
+                pixmap = pixmap.scaled(
+                    pixmap.width() // 2,
+                    pixmap.height() // 2,
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+            self.setPixmap(pixmap)
 
         self.setPos(obj.get_posX(), obj.get_posY())
         self.setAcceptHoverEvents(True)
@@ -59,4 +67,14 @@ class MovingObject(QGraphicsPixmapItem):
             self.obj.get_status()))
 
     def change_image(self, image_path):
-        self.setPixmap(QPixmap(image_path))
+        pixmap = QPixmap(image_path)
+
+        if self.obj.get_type() == "AssetDatacenter":
+            pixmap = pixmap.scaled(
+                pixmap.width() // 2,
+                pixmap.height() // 2,
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation
+            )
+
+        self.setPixmap(pixmap)

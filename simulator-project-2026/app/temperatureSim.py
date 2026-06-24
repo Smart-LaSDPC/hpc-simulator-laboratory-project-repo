@@ -1,87 +1,134 @@
-from PyQt5.QtWidgets import QLabel, QLineEdit
-from PyQt5.QtCore import QTimer
+import time
+
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QLabel, QLineEdit, QFrame, QVBoxLayout, QHBoxLayout
+
 
 class TemperatureSimulator:
-    def __init__(self, centralwidget, gridLayout):
-        self.centralwidget = centralwidget
-        self.gridLayout = gridLayout
-        self.numLamps = 0
+    def __init__(self, parent_widget, parent_layout, zone_name="Room", temp_threshold=22,
+             qLamp=100, qHeater=2000, qAC=3500, qRack=500, racks_per_datacenter=14,
+             uValue=0.2, wallArea=100, volume=50):
+        self.zone_name = zone_name
+        self.temp_threshold = temp_threshold
+        self.qLamp = qLamp                          # Heat gain from each lamp in Watts
+        self.qHeater = qHeater                      # Heat gain from each heater in Watts
+        self.qAC = qAC                              # Cooling capacity of each AC in Watts
+        self.qRack = qRack                          # Heat gain per server rack in Watts
+        self.racks_per_datacenter = racks_per_datacenter  # Racks inside each datacenter asset
+        self.uValue = 0.2                           # Overall heat transfer coefficient (W/m^2*K)
+        self.wallArea = 100                         # Area of the walls in m^2
+        self.volume = 50                            # Volume of the room in m^3
+        self.cPair = 1005                           # J/(kg*K) - Specific heat capacity of air
         self.numHeaters = 0
-        self.qLamp = 100  # Heat gain from each lamp in Watts
-        self.qHeater = 2000  # Heat gain from each heater in Watts
-        self.uValue = 0.2  # Overall heat transfer coefficient (W/m^2*K)
-        self.wallArea = 100  # Area of the walls in m^2
-        self.volume = 50  # Volume of the room in m^3
-        self.cPair = 1005  # J/(kg*K) - Specific heat capacity of air
-        self.density = 1.225  # kg/m^3 - Density of air
-        self.setupTemperatureSimulator()
+        self.numACs = 0
+        self.numLamps = 0
+        self.numDatacenters = 0
+        self.density = 1.225                        # kg/m^3 - Density of air
+        self._registered_sensors = []
+        self.assetList = []
+        self.temperature_history = []              # list of (timestamp_float, temperature)
+        self.energy_history = []                   # list of (timestamp_float, cumulative_energy_Wh)
+        self.total_energy_wh = 0.0
+        self._delta_t = 1.0                        # seconds per simulation step
+        self._build_ui(parent_widget, parent_layout)
 
-    def setupTemperatureSimulator(self):
-        self.roomTempLabel = QLabel("Room Temperature (°C):", self.centralwidget)
-        self.roomTempInput = QLineEdit("25", self.centralwidget)
+    def _build_ui(self, parent_widget, parent_layout):
+        self.frame = QFrame(parent_widget)
+        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.layout = QVBoxLayout(self.frame)
+        self.layout.setSpacing(4)
 
-        self.outsideTempLabel = QLabel("Outside Temperature (°C):", self.centralwidget)
-        self.outsideTempInput = QLineEdit("20", self.centralwidget)
+        title = QLabel(f"<b>{self.zone_name}</b>", self.frame)
+        title.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(title)
 
-        self.lampsLabel = QLabel("Number of Lamps:", self.centralwidget)
-        self.lampsCountLabel = QLabel("0", self.centralwidget)
+        def add_row(label_text, widget):
+            row = QHBoxLayout()
+            row.addWidget(QLabel(label_text, self.frame))
+            row.addWidget(widget)
+            self.layout.addLayout(row)
 
-        self.heatersLabel = QLabel("Number of Heaters:", self.centralwidget)
-        self.heatersCountLabel = QLabel("0", self.centralwidget)
+        self.roomTempInput = QLineEdit("25", self.frame)
+        add_row("Room Temp (°C):", self.roomTempInput)
 
-        self.gridLayout.addWidget(self.roomTempLabel, 3, 0, 1, 1)
-        self.gridLayout.addWidget(self.roomTempInput, 3, 1, 1, 1)
+        self.temp_threshold_label = QLabel(str(self.temp_threshold), self.frame)
+        add_row("Threshold:", self.temp_threshold_label)
 
-        self.gridLayout.addWidget(self.outsideTempLabel, 4, 0, 1, 1)
-        self.gridLayout.addWidget(self.outsideTempInput, 4, 1, 1, 1)
+        self.outsideTempInput = QLineEdit("20", self.frame)
+        add_row("Outside Temp (°C):", self.outsideTempInput)
 
-        self.gridLayout.addWidget(self.lampsLabel, 5, 0, 1, 1)
-        self.gridLayout.addWidget(self.lampsCountLabel, 5, 1, 1, 1)
+        self.lampsCountLabel = QLabel("ON: 0 | OFF: 0", self.frame)
+        add_row("Lamps:", self.lampsCountLabel)
 
-        self.gridLayout.addWidget(self.heatersLabel, 6, 0, 1, 1)
-        self.gridLayout.addWidget(self.heatersCountLabel, 6, 1, 1, 1)
+        self.heatersCountLabel = QLabel("ON: 0 | OFF: 0", self.frame)
+        add_row("Heaters:", self.heatersCountLabel)
+
+        self.acCountLabel = QLabel("ON: 0 | OFF: 0", self.frame)
+        add_row("ACs:", self.acCountLabel)
+
+        self.datacenterCountLabel = QLabel("ON: 0 | OFF: 0", self.frame)
+        add_row("Datacenters (14 racks):", self.datacenterCountLabel)
+
+        parent_layout.addWidget(self.frame)
 
         self.simulationTimer = QTimer()
         self.simulationTimer.timeout.connect(self.updateTemperature)
-        self.simulationTimer.start(1000)  # Update every second
+        self.simulationTimer.start(1000)
+
+    def register_temperature_sensor(self, sensor_simulator):
+        self._registered_sensors.append(sensor_simulator)
 
     def updateTemperature(self):
         try:
             tRoom = float(self.roomTempInput.text())
-            tOut = float(self.outsideTempInput.text())
+            tOut  = float(self.outsideTempInput.text())
         except ValueError:
             return
 
         self.updateNumLampsHeatersTurnOn()
 
-        qGainLamps = self.qLamp * self.numLamps  # Total heat gain from lamps
-        qGainHeaters = self.qHeater * self.numHeaters  # Total heat gain from heaters
-        qGain = qGainLamps + qGainHeaters  # Combined heat gain
-        qLoss = self.uValue * self.wallArea * (tRoom - tOut)  # Heat loss to the outside environment
-
-        # Calculate temperature change
-        deltaT = (qGain - qLoss) / (self.density * self.volume * self.cPair)
-        tRoom += deltaT  # Update room temperature
+        qNet   = (self.qLamp * self.numLamps) + (self.qHeater * self.numHeaters) - (self.qAC * self.numACs) + (self.qRack * self.racks_per_datacenter * self.numDatacenters)
+        qLoss  = self.uValue * self.wallArea * (tRoom - tOut)
+        deltaT = (qNet - qLoss) / (self.density * self.volume * self.cPair)
+        tRoom += deltaT
 
         self.roomTempInput.setText(f"{tRoom:.4f}")
 
+        ts = time.time()
+        self.temperature_history.append((ts, tRoom))
+
+        power_w = (self.qLamp * self.numLamps
+                   + self.qHeater * self.numHeaters
+                   + self.qAC * self.numACs
+                   + self.qRack * self.racks_per_datacenter * self.numDatacenters)
+        self.total_energy_wh += (power_w * self._delta_t) / 3600.0
+        self.energy_history.append((ts, self.total_energy_wh))
+
+        for sensor_sim in self._registered_sensors:
+            sensor_sim.set_external_value(tRoom)
+
     def updateNumLampsHeatersTurnOn(self):
-        self.numLamps = 0
-        self.numHeaters = 0
+        self.numLamps = self.numHeaters = self.numACs = self.numDatacenters = 0
+
         for asset in self.assetList:
-            if asset.obj.get_status() == "ON" and asset.obj.get_type() == "AssetLamp":
-                self.numLamps += 1
-            elif asset.obj.get_status() == "ON" and asset.obj.get_type() == "AssetHeater":
-                self.numHeaters += 1
+            t = asset.obj.get_type()
+            s = asset.obj.get_status()
+            if s == "ON":
+                if t == "AssetLamp":
+                    self.numLamps += 1
+                elif t == "AssetHeat":
+                    self.numHeaters += 1
+                elif t == "AssetAirConditioning":
+                    self.numACs += 1
+                elif t == "AssetDatacenter":
+                    self.numDatacenters += 1
 
-        turnOnLamps = self.numLamps
-        turnOffLamps = len([asset for asset in self.assetList if asset.obj.get_type() == "AssetLamp"]) - self.numLamps
+        totalLamps       = sum(1 for a in self.assetList if a.obj.get_type() == "AssetLamp")
+        totalHeaters     = sum(1 for a in self.assetList if a.obj.get_type() == "AssetHeat")
+        totalACs         = sum(1 for a in self.assetList if a.obj.get_type() == "AssetAirConditioning")
+        totalDatacenters = sum(1 for a in self.assetList if a.obj.get_type() == "AssetDatacenter")
 
-        turnOnHeaters = self.numHeaters
-        turnOffHeaters = len([asset for asset in self.assetList if asset.obj.get_type() == "AssetHeater"]) - self.numHeaters
-
-        self.lampsCountLabel.setText(f'ON: {turnOnLamps} | OFF: {turnOffLamps}')
-        self.heatersCountLabel.setText(f'ON: {turnOnHeaters} | OFF: {turnOffHeaters}')
-
-    def set_asset_list(self, assetList):
-        self.assetList = assetList
+        self.lampsCountLabel.setText(f"ON: {self.numLamps} | OFF: {totalLamps - self.numLamps}")
+        self.heatersCountLabel.setText(f"ON: {self.numHeaters} | OFF: {totalHeaters - self.numHeaters}")
+        self.acCountLabel.setText(f"ON: {self.numACs} | OFF: {totalACs - self.numACs}")
+        self.datacenterCountLabel.setText(f"ON: {self.numDatacenters} | OFF: {totalDatacenters - self.numDatacenters}")

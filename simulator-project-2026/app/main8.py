@@ -173,20 +173,21 @@ class Ui_MainWindow(QMainWindow):
     def setupToolBar(self, mainWindow):
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
+        self.toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         mainWindow.addToolBar(self.toolbar)
 
         self.create_asset = QAction(
-            QIcon("media/new_asset.png"), "Create Asset", mainWindow
+            QIcon("media/new_asset.png"), "New Asset", mainWindow
         )
         self.admin_asset = QAction(
-            QIcon("media/edit_asset.png"), "Administrate Asset", mainWindow
+            QIcon("media/edit_asset.png"), "Manage Assets", mainWindow
         )
 
         self.create_sensor = QAction(
-            QIcon("media/new_sensor.png"), "Create Sensor", mainWindow
+            QIcon("media/new_sensor.png"), "New Sensor", mainWindow
         )
         self.admin_sensor = QAction(
-            QIcon("media/edit_sensor.png"), "Administrate Sensor", mainWindow
+            QIcon("media/edit_sensor.png"), "Manage Sensors", mainWindow
         )
 
         self.energy_monitoring = QAction(

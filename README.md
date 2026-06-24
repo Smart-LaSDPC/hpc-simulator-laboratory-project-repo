@@ -1,4 +1,11 @@
-# Using Poetry to Install and Run a Python Program
+# Smart-Lab Simulator Repository
+![Front Simulator View](/images/front_view1.png)
+![Front Simulator View](/images/front_view2.png)
+
+About the Simulator:
+> The simulator was developed in Python 3.12 using Poetry for dependency management and packaging. Its graphical user interface was implemented with PyQt.
+
+# Using Poetry to Install and Run the Simulator
 
 ## 1. Install Poetry
 
@@ -132,4 +139,5 @@ poetry run python app.py
 ```
 
 ---
+
 

@@ -189,31 +189,31 @@ class Ui_MainWindow(QMainWindow):
             QIcon("media/edit_sensor.png"), "Administrate Sensor", mainWindow
         )
 
+        self.energy_monitoring = QAction(
+            QIcon("media/monitor-energy.png"), "Energy Monitoring", mainWindow
+        )
+
         self.toolbar.addAction(self.create_asset)
         self.toolbar.addAction(self.admin_asset)
         self.toolbar.addAction(self.create_sensor)
         self.toolbar.addAction(self.admin_sensor)
-
-        spacer = QtWidgets.QWidget()
-        spacer.setSizePolicy(
-            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
-        )
-        self.toolbar.addWidget(spacer)
-
-        self.energy_monitoring = QAction("Energy Monitoring", mainWindow)
         self.toolbar.addAction(self.energy_monitoring)
 
         self.create_asset.triggered.connect(
             lambda: self.open_windows_create_asset(self)
         )
-        self.admin_asset.triggered.connect(lambda: self.open_windows_admin_asset(self))
+        self.admin_asset.triggered.connect(
+            lambda: self.open_windows_admin_asset(self)
+        )
         self.create_sensor.triggered.connect(
             lambda: self.open_windows_create_sensor(self)
         )
         self.admin_sensor.triggered.connect(
             lambda: self.open_windows_admin_sensor(self)
         )
-        self.energy_monitoring.triggered.connect(self.open_energy_monitor)
+        self.energy_monitoring.triggered.connect(
+            self.open_energy_monitor
+        )
 
     def setupTemperatureSimulator(self):
         self.tempScrollArea = QtWidgets.QScrollArea(self.centralwidget)

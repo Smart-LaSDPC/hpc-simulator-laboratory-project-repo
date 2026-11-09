@@ -72,7 +72,7 @@ class SensorSimulator:
             }
 
             # Add presence information if the sensor type is "presence" and user_object is not None
-            if self.sensor_type == "presence" and self.user_object is not None:
+            if self.sensor_type == "SensorPresence" and self.user_object is not None:
                 # Assuming user_object.get_valuesInJson() returns a dictionary
                 payload_dict["presence"] = self.user_object.get_valuesInJson()
 

@@ -68,7 +68,8 @@ class Ui_MainWindow(QMainWindow):
         self.publish_timer = QTimer()  # Add a timer for publishing MQTT messages
 
         # Define platform coordinates
-        self.platforms = {"Platform 1": (877, 36), "Platform 2": (657, 188)}
+        # Platform 3 = data center door (adjust the coordinates to the map if needed)
+        self.platforms = {"Platform 1": (877, 36), "Platform 2": (657, 188), "Platform 3": (585, 200)}
 
         # Define users dictionary
         self.users = {
@@ -355,7 +356,7 @@ class Ui_MainWindow(QMainWindow):
 
         # Add the second combo box for the platforms
         self.platformComboBox = QComboBox(self.centralwidget)
-        self.platformComboBox.addItems(["Platform 1", "Platform 2"])
+        self.platformComboBox.addItems(["Platform 1", "Platform 2", "Platform 3"])
         self.verticalLayoutRight.addWidget(self.platformComboBox)
 
         # Add the "Add User" button
@@ -402,6 +403,8 @@ class Ui_MainWindow(QMainWindow):
 
         if platform == "Platform 1":
             self.changeSensorValue2("sensor_presence1", 1, temp_user)
+        elif platform == "Platform 3":
+            self.changeSensorValue2("sensor_presence3", 1, temp_user)
         else:
             self.changeSensorValue2("sensor_presence2", 1, temp_user)
 
@@ -412,6 +415,7 @@ class Ui_MainWindow(QMainWindow):
         self.userList.clear()
         self.changeSensorValue2("sensor_presence1", 0, None)
         self.changeSensorValue2("sensor_presence2", 0, None)
+        self.changeSensorValue2("sensor_presence3", 0, None)
 
     def removeOneUser(self):
         print("Removing one user...")
@@ -436,6 +440,8 @@ class Ui_MainWindow(QMainWindow):
         # Adjust the sensor value based on the platform
         if platform == "Platform 1":
             self.changeSensorValue2("sensor_presence1", 0, None)
+        elif platform == "Platform 3":
+            self.changeSensorValue2("sensor_presence3", 0, None)
         else:
             self.changeSensorValue2("sensor_presence2", 0, None)
 

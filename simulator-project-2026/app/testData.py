@@ -29,6 +29,9 @@ class TestData(object):
 													 "media/sensor/sensor_on.png", "media/sensor/sensor_off.png", default_user))		
 		listSensors.append(Sensor('sensor_presence2', 'SensorPresence', 'no description', 740.0, 150.00,
 													 "media/sensor/sensor_on.png", "media/sensor/sensor_off.png", default_user))
+		# Presence sensor at the data center door (role-based access, rules r10-r12 in the MAS)
+		listSensors.append(Sensor('sensor_presence3', 'SensorPresence', 'no description', 600.0, 185.00,
+													 "media/sensor/sensor_on.png", "media/sensor/sensor_off.png", default_user))
 
 		listSensors.append(Sensor('sensor_temperature_outside', 'SensorTemperature', 'no description', 930.0, 640.0,
 													 "media/sensor/sensor_on.png", "media/sensor/sensor_off.png"))

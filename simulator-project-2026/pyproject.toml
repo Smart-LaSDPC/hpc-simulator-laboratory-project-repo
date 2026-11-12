@@ -1,25 +1,15 @@
-[project]
-name = "simulator-project-2026"
-version = "0.1.0"
-description = ""
-authors = [
-    {name = "Your Name",email = "you@example.com"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "matplotlib (>=3.11.0,<4.0.0)"
-]
-
 [tool.poetry]
-packages = [{include = "simulator_project_2026", from = "src"}]
+name = "simulator-project-2026"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+packages = [{include = "simulator_project_2026", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+matplotlib = ">=3.11.0,<4.0.0"
+python-dotenv = ">=1.2.4,<2.0.0"
 PyQt5 = "^5.15.9"
 paho-mqtt = "1.6.1"
 

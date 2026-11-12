@@ -8,6 +8,7 @@ from adminAssetWindow import Ui_adminAssetWindow
 from adminSensorWindow import Ui_adminSensorWindow
 from asset import Asset
 from energyMonitorWindow import EnergyMonitorWindow
+from influxMonitorWindow import InfluxMonitorWindow
 from movingObject import MovingObject
 from mqttConfig import MqttConfig
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -193,12 +194,16 @@ class Ui_MainWindow(QMainWindow):
         self.energy_monitoring = QAction(
             QIcon("media/monitor-energy.png"), "Energy Monitoring", mainWindow
         )
+        self.influx_monitoring = QAction(
+            QIcon("media/sensor.png"), "InfluxDB Monitor", mainWindow
+        )
 
         self.toolbar.addAction(self.create_asset)
         self.toolbar.addAction(self.admin_asset)
         self.toolbar.addAction(self.create_sensor)
         self.toolbar.addAction(self.admin_sensor)
         self.toolbar.addAction(self.energy_monitoring)
+        self.toolbar.addAction(self.influx_monitoring)
 
         self.create_asset.triggered.connect(
             lambda: self.open_windows_create_asset(self)
@@ -214,6 +219,9 @@ class Ui_MainWindow(QMainWindow):
         )
         self.energy_monitoring.triggered.connect(
             self.open_energy_monitor
+        )
+        self.influx_monitoring.triggered.connect(
+            self.open_influx_monitor
         )
 
     def setupTemperatureSimulator(self):
@@ -277,6 +285,10 @@ class Ui_MainWindow(QMainWindow):
             [self.tempSimDatacenter, self.tempSimLab]
         )
         self.energy_window.show()
+
+    def open_influx_monitor(self):
+        self.influx_window = InfluxMonitorWindow()
+        self.influx_window.show()
 
     def open_windows_admin_sensor(self, p_Ui_MainWindow):
         self.window = QtWidgets.QMainWindow()

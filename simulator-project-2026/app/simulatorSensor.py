@@ -71,8 +71,8 @@ class SensorSimulator:
                 "date_time": date_time,
             }
 
-            # Add presence information if the sensor type is "presence" and user_object is not None
-            if self.sensor_type == "presence" and self.user_object is not None:
+            # Add presence information if the sensor type is "presence" / "SensorPresence" and user_object is not None
+            if self.sensor_type in ("presence", "SensorPresence") and self.user_object is not None:
                 # Assuming user_object.get_valuesInJson() returns a dictionary
                 payload_dict["presence"] = self.user_object.get_valuesInJson()
 
@@ -211,7 +211,7 @@ class PresenceSensor(SensorSimulator):
     def simulate_reading(self):
         return self.value
 
-    def change_reading(self, new_value, new_user):
+    def change_reading(self, new_value, new_user=None):
         self.value = new_value
         self.user_object = new_user
 

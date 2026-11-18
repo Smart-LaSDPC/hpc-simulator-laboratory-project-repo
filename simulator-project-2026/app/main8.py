@@ -115,6 +115,11 @@ class Ui_MainWindow(QMainWindow):
         self.setupPersonButton()
         self.setupImageAssetButton()  # Setup the new button
 
+        self.statusLabel = QtWidgets.QLabel("System ready.", self.centralwidget)
+        self.statusLabel.setStyleSheet("font-weight: bold; color: #2c3e50; padding: 5px;")
+        self.statusLabel.setWordWrap(True)
+        self.verticalLayoutRight.addWidget(self.statusLabel)
+
         self.update_signal.connect(self.update_asset_state)
         self.update_signal_sensor.connect(self.update_sensor_values)
 
@@ -577,6 +582,37 @@ class Ui_MainWindow(QMainWindow):
 
     def update_asset_state(self, id_asset, new_value):
         print(f"Updating asset... > {id_asset} , {new_value}")
+        # Map door <-> sensor
+        door_sensor_map = {
+            "asset_door_lab1006": ("sensor_presence1", "Laboratory"),
+            "asset_door_datacenter": ("sensor_presence2", "Data Center")
+        }
+
+        if id_asset in door_sensor_map:
+            sensor_id, ubicacion = door_sensor_map[id_asset]
+            # Obtener el usuario asignado al sensor de presencia
+            user_obj = None
+            for sensor in self.sensorList:
+                if sensor.obj.get_id() == sensor_id:
+                    user_obj = sensor.obj.get_simulator_sensor().user_object
+                    break
+
+            if user_obj:
+                rol = user_obj.get_rol()
+                if new_value == "1":
+                    mensaje = f"User with role '{rol}' detected: Operning {ubicacion} door."
+                    self.statusLabel.setStyleSheet("color: green; font-weight: bold;")
+                else:
+                    mensaje = f"User with role '{rol}' detected: Does not have access to the {ubicacion}."
+                    self.statusLabel.setStyleSheet("color: red; font-weight: bold;")
+
+                print(f"[ACCESO MAS] {mensaje}")
+                self.statusLabel.setText(mensaje)
+            else:
+                if new_value == "0":
+                    self.statusLabel.setText(f"Closed {ubicacion} door (unoccupied).")
+                    self.statusLabel.setStyleSheet("color: gray;")
+
         for v_asset in self.assetList:
             if v_asset.obj.get_id() == id_asset:
                 if new_value == "1":
